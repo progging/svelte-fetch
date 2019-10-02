@@ -1,0 +1,22 @@
+{
+  "name": "svelte-fetch",
+  "version": "0.0.1",
+  "description": "A `fetch` client with Svelte store integration for request states.",
+  "main": "index.js",
+  "author": "robin@pettersen.dev",
+  "scripts": {
+    "test": "mocha ./test"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctrl-alt-null/svelte-fetch"
+  },
+  "peerDependencies": {
+    "svelte": "^3.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.1"
+  }
+}
