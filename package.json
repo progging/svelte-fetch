@@ -1,6 +1,6 @@
 {
   "name": "svelte-fetch",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A `fetch` client with Svelte store integration for request states.",
   "main": "index.js",
   "author": "robin@pettersen.dev",
