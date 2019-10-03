@@ -6,7 +6,7 @@ describe("svelte-fetch", function () {
     this.timeout(10000)
 
     it("should make a request", async function () {
-        //TODO
+        //TODO https://randomfox.ca/floof/
     })
 
 })
