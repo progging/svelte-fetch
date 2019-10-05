@@ -1,6 +1,6 @@
 {
   "name": "svelte-fetch",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A `fetch` client with Svelte store integration for request states.",
   "main": "index.js",
   "author": "robin@pettersen.dev",
@@ -18,5 +18,14 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^6.2.1"
+  },
+  "keywords": [
+    "fetch",
+    "http",
+    "svelte",
+    "svelte store"
+  ],
+  "dependencies": {
+    "toqs": "^1.0.2"
   }
 }
