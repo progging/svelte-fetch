@@ -64,7 +64,7 @@ export default class SvelteFetch {
         // }
 
         const request = fetch(url, fetchOptions)
-            //.then(handleError)
+        //.then(handleError)
             .finally(() => {
                 const ongoingRequests = get(_ongoingRequests)
                 const indexToRemove = ongoingRequests.findIndex(request => request.index === index)
@@ -105,15 +105,30 @@ export default class SvelteFetch {
         throw new Error("Not implemented")
     }
 
+    //TODO
+    expect(dataType) {
+        this._metaForNextRequest = Object.assign(
+            this._metaForNextRequest || {},
+            { dataType }
+
+        )
+    }
+
 
     get blocking() {
-        this._metaForNextRequest = { isBlocking: true }
+        this._metaForNextRequest = Object.assign(
+            this._metaForNextRequest || {},
+            { isBlocking: true }
+        )
         return this
 
     }
 
     get background() {
-        this._metaForNextRequest = { isBackground: true }
+        this._metaForNextRequest = Object.assign(
+            this._metaForNextRequest || {},
+            { isBackground: true }
+        )
         return this
     }
 
@@ -122,7 +137,7 @@ export default class SvelteFetch {
      * @param response {Response} from `fetch`.
      * @returns {Promise<*>} Returns data or `null` if there is none.
      */
-    async static data(response) {
+    static async data(response) {
         let contentType = null, data = null
 
         try {
