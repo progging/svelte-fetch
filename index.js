@@ -3,50 +3,58 @@ import {writable,readable,get} from "svelte/store"
 let requestIndex = 0
 const _ongoingRequests = writable([])
 
-// Returns all ongoing requests
+/**
+ * Returns all ongoing requests.
+ * @type {Array<Request>}
+ */
 export const ongoingRequests = readable([], function start(set) {
-    const unsubscribe = _ongoingRequests.subscribe(requests => {
-        set(requests)
-    })
+    const unsubscribe = _ongoingRequests.subscribe(requests => set(requests))
     return function stop() {
         unsubscribe()
     }
 })
 
-// Returns true if the client currently has _any_ requests.
+
+/***
+ * Returns true if there are any **non-blocking** or **non-blackground** requests ongoing.
+ * @type {Readable<boolean>}
+ */
 export const hasAny = readable(false, function start(set) {
-    const unsubscribe = _ongoingRequests.subscribe(requests => {
-        set(requests.length)
-    })
+    const unsubscribe = _ongoingRequests.subscribe(requests =>
+        set(requests.filter(req => !req.meta.isBlocking && !req.meta.isBackground).length))
     return function stop() {
         unsubscribe()
     }
 })
 
-// Returns true if the client currently has any **blocking** requests.
+
+/**
+ * Returns true if there are any ongoing **blocking** requests.
+ * @type {Readable<boolean>}
+ */
 export const hasBlocking = readable(false, function start(set) {
-    const unsubscribe = _ongoingRequests.subscribe(requests => {
-        set(requests.filter(request => request.meta.isBlocking).length)
-    })
+    const unsubscribe = _ongoingRequests.subscribe(requests => set(requests.filter(req => req.meta.isBlocking).length))
+
     return function stop() {
         unsubscribe()
     }
 })
 
-// Returns true if client currently has any **background** requests.
+
+/**
+ * Returns true if there are any ongoing **background** requests.
+ * @type {Readable<boolean>}
+ */
 export const hasBackground = readable(false, function start(set) {
-    const unsubscribe = _ongoingRequests.subscribe(requests => {
-        set(requests.filter(request => request.meta.isBackground).length)
-    })
+    const unsubscribe = _ongoingRequests.subscribe(requests => set(requests.filter(req => req.meta.isBackground).length))
     return function stop() {
         unsubscribe()
     }
 })
+
 
 export default class SvelteFetch {
-    //TODO
-    constructor(/*baseUrl, baseFetchConfig*/) {
-        //this.baseUrl = baseUrl
+    constructor() {
         this._metaForNextRequest = null
     }
 
@@ -77,6 +85,13 @@ export default class SvelteFetch {
 
         const response = await request
 
+        let data = null
+
+        if(meta.expectedContentType) {
+            data = await this.parseContentFromExpected(meta.expectedContentType, response)
+            return data
+        }
+
         return response
     }
 
@@ -105,13 +120,13 @@ export default class SvelteFetch {
         throw new Error("Not implemented")
     }
 
-    //TODO
-    expect(dataType) {
+
+    expect(contentType) {
         this._metaForNextRequest = Object.assign(
             this._metaForNextRequest || {},
-            { dataType }
-
+            { expectedContentType: contentType }
         )
+        return this
     }
 
 
@@ -124,6 +139,7 @@ export default class SvelteFetch {
 
     }
 
+
     get background() {
         this._metaForNextRequest = Object.assign(
             this._metaForNextRequest || {},
@@ -132,12 +148,13 @@ export default class SvelteFetch {
         return this
     }
 
+
     /**
      * Parses response based on the `Content-Type` header.
      * @param response {Response} from `fetch`.
      * @returns {Promise<*>} Returns data or `null` if there is none.
      */
-    static async data(response) {
+    static async contentTypeFromHeader(response) {
         let contentType = null, data = null
 
         try {
@@ -156,8 +173,31 @@ export default class SvelteFetch {
         } else if (contentType.indexOf("text") > -1) {
             data = await response.text()
         }
-
         return data
     }
 
+
+    /**
+     * Uses the `expect` hook (i.e.) `SvelteFetch.expect(JSON|String|Blob|Image)[...]` syntax to parse data.
+     * @param response {Response} from `fetch`.
+     * @returns {Promise<*>} Returns data or `null` if there is none.
+     */
+    async parseContentFromExpected(expectedContentType, response) {
+        let data = null
+        switch(expectedContentType) {
+            case String:
+                data = await response.text()
+                break
+            case Blob:
+            case Image:
+                data = await response.blob()
+            case Number:
+            case JSON:
+                data = await response.json()
+                break
+            default:
+                throw new Error(`No handler for ${this._metaForNextRequest.expectedContentType}`)
+        }
+        return data
+    }
 }
