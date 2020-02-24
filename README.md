@@ -9,7 +9,7 @@ When making a web app, I **always** end up adding ongoing requests to some centr
 `npm i -S svelte-fetch` or `yarn add svelte-fetch`
 
 ## Usage
-```sveltehtml
+```html
 <script>
 
     import Fetch, {
